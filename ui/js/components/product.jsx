@@ -47,6 +47,8 @@ class Product extends Component {
     const properties = _.map(filteredProps, (propertyValue, propertyKey) => (
       <Property key={propertyKey} propKey={propertyKey} productName={product.name} propValue={!_.isEmpty(propertyValue) ? propertyValue : ''}/>
     ));
+    const finalConfig = Object.assign({}, product.config, {meta: {version: product.version}});
+    const json = JSON.stringify(finalConfig, null, 2);
     const showJsonStyle = this.state.showJson ? {} : {display: 'none'};
     return (
       <div>
@@ -65,7 +67,7 @@ class Product extends Component {
         <div className='view'>
           <button className='view' onClick={this.showJson}>View as Json</button>
           <pre className='json-view' style={showJsonStyle}>
-            {JSON.stringify(product.config, null, 2)}
+            {json}
           </pre>
         </div>
         <form className='add-property' onSubmit={this.addProperty}>
