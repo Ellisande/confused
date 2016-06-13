@@ -1,0 +1,34 @@
+.product {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  * {
+    flex: 1;
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.property {
+  display: flex;
+  flex-direction: row;
+  * + * {
+    margin-left: 10px;
+  }
+}
+
+.prop-key {
+  flex: 1;
+}
+
+.prop-value {
+  flex: 5;
+}
+
+.delete {
+  cursor: pointer;
+}
