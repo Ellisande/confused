@@ -36,14 +36,22 @@ class Configuration {
     return new Configuration(this.name, properties, newVersion, this.imports);
   }
   validate(){
-    const flattenedImports = _.mapValues(this.imports, (configImport, key) => {
-      return flatten(configImport, key);
-    });
-    const mergedImports = _.merge({}, ...flattenedImports);
-    const errors = _.mapValues(this.imports, (configImport, key) => {
-      // const matchingKey = _.findBy(merged)
-    });
-    return flattenedImports;
+    const flattenedImports = this.imports.reduce( (configMap, configImport) => {
+      const key = configImport.name;
+      return Object.assign({}, configMap, {[key]: flatten(configImport.properties)});
+    }, {});
+    const keysToValidate = Object.keys(flattenedImports);
+    const validationErrors = keysToValidate.reduce( (errors, primeKey) => {
+      const current = flattenedImports[primeKey];
+      const omitted = _.omit(flattenedImports, primeKey);
+      const mapped = _.flatten(_.toArray(omitted));
+      const intersection = _.intersection(current, mapped);
+      if(!_.isEmpty(intersection)){
+        return Object.assign({}, errors, {[primeKey]: intersection});
+      }
+      return errors;
+    }, {});
+    return _.isEmpty(validationErrors) ? undefined : validationErrors;
   }
   flatten(){
     const composedProps = this.imports.map( configImport => configImport.properties);

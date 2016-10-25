@@ -50,3 +50,15 @@ Scenario: Imports should not overwrite things explicitly defined in the file
   And an existing configuration file named {staging}
   When I flatten the config
   Then the flattened file should have a property called {session.key} with a value of {bbb}
+
+Scenario: Importing two files with the same property should throw an error
+  Given a property called {session.key} with a value of {abc123}
+  And an existing configuration file named {note-and-vote}
+  And an existing configuration file named {staging}
+  And an imported configuration file of {note-and-vote}
+  And an imported configuration file of {staging}
+  And an existing configuration file named {conflict}
+  When I validate the configuration
+  Then I should receive an error
+  And the {note-and-vote} import should be in error
+  And the {staging} import should be in error

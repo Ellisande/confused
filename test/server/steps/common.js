@@ -5,6 +5,7 @@ import {
   expect
 } from 'chai';
 import _ from 'lodash';
+import uuid from 'node-uuid';
 
 module.exports = function() {
   this.Given(/an application name of {(.*)}/, function(appName) {
@@ -40,14 +41,8 @@ module.exports = function() {
   });
 
   this.When(/I create a configuration file/, function() {
-    this.configuration = new Configuration(this.existingAppName, this.existingProperties);
+    this.configuration = new Configuration(this.existingAppName || uuid.v4(), this.existingProperties, '0.0.0', this.existingImports || []);
   });
-
-  // this.When(/I import {(.*)} inside the {(.*)} configuration file/, function(dependencyName, currentConfigName){
-  //   const dependency = this.existingConfigurations[dependencyName];
-  //   const currentConfig = this.existingConfigurations[currentConfigName];
-  //   const newConfig = currentConfig.addImport(dependency);
-  // });
 
   this.When(/I add a property called {(.*)} with a value of {(.*)}/, function(newPropertyName, newPropertyValue){
     this.configuration = this.existingConfiguration.setProperty(newPropertyName, newPropertyValue);
@@ -65,6 +60,10 @@ module.exports = function() {
     const configToImport = _.get(this.existingConfigurations, importName);
     const testConfig = _.get(this.existingConfigurations, testFile);
     this.configuration = testConfig.addImport(configToImport);
+  });
+
+  this.When(/I validate the configuration/, function(){
+    this.error = this.existingConfiguration.validate();
   });
 
   this.Then(/a configuration file should be created/, function() {
@@ -97,5 +96,13 @@ module.exports = function() {
     const actualImport = this.configuration.imports.find(configImport => configImport.name === expectedImportName);
     expect(actualImport).to.exist;
     expect(actualImport.version).to.equal(expectedImportVersion);
+  });
+
+  this.Then(/I should receive an error/, function(){
+    expect(this.error).to.exist;
+  });
+
+  this.Then(/the {(.*)} import should be in error/, function(expectedBadImport){
+    expect(_.get(this.error, expectedBadImport)).to.exist;
   });
 };
