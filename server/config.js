@@ -11,9 +11,13 @@ const flatten = (object, prefix) => {
 
 class Configuration {
   constructor(configName, properties = {}, initialVersion = '0.0.0', imports = []){
+    if(_.isEmpty(configName)){
+      throw new Error('A configuration file must have a name defined.');
+    }
     this.name = configName;
     this.properties = Object.assign({}, properties);
     this.imports = [...imports];
+    this.importKeys = imports.map( configImport => `${configImport.name}@${configImport.version}`);
     this.version = initialVersion;
   }
   addImport(config){
@@ -51,6 +55,7 @@ class Configuration {
       }
       return errors;
     }, {});
+    //Filter out any errors that are explici
     return _.isEmpty(validationErrors) ? undefined : validationErrors;
   }
   flatten(){
@@ -60,7 +65,32 @@ class Configuration {
   };
 }
 
+class InflatableConfiguration extends Configuration {
+  constructor(inflater, configName, version, properties = {}, importKeys = []){
+    super(configName, properties, version, []);
+    //maybe don't need to take in props?
+    this.inflatable = true;
+    this.inflater = inflater;
+    this.importKeys = importKeys;
+  }
+  inflate(){
+    if(!_.isEmpty(this.imports)){
+      return Object.assign({}, this);
+    }
+    const imports = this.importKeys.map( importKey => this.inflater(importKey));
+    const notAllInflated = imports.some( configImport => configImport instanceof InflatableConfiguration);
+    if(notAllInflated){
+      throw new Error('Could not correctly inflate the dependency tree.');
+    }
+    return new Configuration(this.name, this.properties, this.version, imports);
+  }
+  setInflater(inflater){
+    return new InflatableConfiguration(inflater, this.name, this.version, this.properties, this.importKeys);
+  }
+}
+
 export {
-  Configuration
+  Configuration,
+  InflatableConfiguration
 };
 export default Configuration;
