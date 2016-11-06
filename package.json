@@ -1,6 +1,7 @@
 {
   "author": "Justin Dragos <justin.dragos@gmail.com>",
   "dependencies": {
+    "body-parser": "^1.15.2",
     "engine.io": "^1.6.9",
     "flat": "^2.0.0",
     "lodash": "^4.10.0",
