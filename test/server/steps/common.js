@@ -13,9 +13,9 @@ module.exports = function() {
   });
 
   this.Given(/^a property called {(.*)} with a value of {(.*)}$/, function(propertyName, propertyValue) {
-    this.existingProperties = _.merge({}, this.existingProperties, {
-      [propertyName]: propertyValue
-    });
+    const properties = Object.assign({}, this.existingProperties);
+    _.set(properties, propertyName, propertyValue);
+    this.existingProperties = properties;
   });
 
   this.Given(/an existing configuration file named {(.*)}/, function(newConfigName) {
@@ -104,5 +104,11 @@ module.exports = function() {
 
   this.Then(/the {(.*)} import should be in error/, function(expectedBadImport){
     expect(_.get(this.error, expectedBadImport)).to.exist;
+  });
+
+  this.Then(/the configuration should have no imports/, function(){
+    expect(this.configuration.imports).to.have.lengthOf(0);
+    expect(this.configuration.importKeys).to.have.lengthOf(0);
+
   });
 };

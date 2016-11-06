@@ -34,7 +34,6 @@ Scenario: You should be able to flatten the config file
   When I flatten the config
   Then the flattened file should have a property called {vendor.key} with a value of {abc123}
 
-
 Scenario: You should be able to import a configuration file
   Given a property called {session.key} with a value of {abc123}
   And an existing configuration file named {note-and-vote}
